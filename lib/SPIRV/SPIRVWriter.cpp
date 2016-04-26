@@ -858,13 +858,15 @@ LLVMToSPIRV::transValueWithoutDecoration(Value *V, SPIRVBasicBlock *BB,
       }
       Inst->dropAllReferences();
     }
+    StorageClass storageClass = SPIRSPIRVAddrSpaceMap::map(static_cast<SPIRAddressSpace>(Ty->getAddressSpace()));
+    if (GV->isConstant())
+        storageClass = StorageClassUniformConstant;
     auto BVar = static_cast<SPIRVVariable *>(BM->addVariable(
       transType(Ty), GV->isConstant(),
       transLinkageType(GV),
       Init ? transValue(Init, nullptr) : nullptr,
       GV->getName(),
-      SPIRSPIRVAddrSpaceMap::map(
-        static_cast<SPIRAddressSpace>(Ty->getAddressSpace())),
+      storageClass,
       nullptr
       ));
     mapValue(V, BVar);
